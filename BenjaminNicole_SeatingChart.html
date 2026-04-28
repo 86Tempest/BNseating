@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Benjamin & Nicole — Seating Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --matcha:      #4A7C59;
+    --matcha-dark: #2F5240;
+    --matcha-mid:  #6A9E78;
+    --sage:        #A8C5A0;
+    --sage-light:  #D4E8CE;
+    --cream:       #F7F2E9;
+    --cream-dark:  #EDE5D5;
+    --gold:        #A8893C;
+    --gold-light:  #D4AF6A;
+    --text:        #2C2C2C;
+    --text-light:  #6B6B6B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--cream);
+    font-family: 'Jost', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 20%, rgba(168,197,160,0.18) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(74,124,89,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(247,242,233,1) 0%, transparent 100%);
+  }
+
+  /* ─── Decorative SVG florals ─── */
+  .floral-corner {
+    position: fixed;
+    opacity: 0.13;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .floral-tl { top: -30px; left: -30px; width: 320px; transform: rotate(0deg); }
+  .floral-br { bottom: -30px; right: -30px; width: 320px; transform: rotate(180deg); }
+  .floral-tr { top: -30px; right: -30px; width: 220px; transform: scaleX(-1); }
+  .floral-bl { bottom: -30px; left: -30px; width: 220px; transform: rotate(180deg) scaleX(-1); }
+
+  /* ─── Header ─── */
+  header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 56px 24px 40px;
+    background: linear-gradient(180deg, rgba(74,124,89,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(168,197,160,0.4);
+  }
+
+  .monogram {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .monogram-divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .monogram-letter {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 4px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: var(--matcha-dark);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--matcha-mid);
+    margin-bottom: 32px;
+  }
+
+  /* ─── Search ─── */
+  .search-section {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .search-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--matcha);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .search-wrap {
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sage);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  #search {
+    width: 100%;
+    padding: 16px 20px 16px 46px;
+    border: 1.5px solid var(--sage);
+    border-radius: 50px;
+    background: rgba(255,255,255,0.85);
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    backdrop-filter: blur(4px);
+  }
+  #search::placeholder { color: #b0b8a8; }
+  #search:focus {
+    border-color: var(--matcha);
+    box-shadow: 0 0 0 4px rgba(74,124,89,0.1);
+  }
+
+  /* ─── Result card ─── */
+  #result {
+    max-width: 560px;
+    margin: 20px auto 0;
+    border-radius: 16px;
+    overflow: hidden;
+    transform: translateY(6px);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+  #result.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .result-found {
+    background: white;
+    border: 1.5px solid var(--sage);
+    box-shadow: 0 8px 32px rgba(74,124,89,0.12);
+  }
+  .result-none {
+    background: #fff8f8;
+    border: 1.5px solid #e8c0c0;
+    padding: 20px 24px;
+    text-align: center;
+    font-size: 14px;
+    color: #a06060;
+    letter-spacing: 0.5px;
+  }
+  .result-header {
+    background: linear-gradient(135deg, var(--matcha) 0%, var(--matcha-mid) 100%);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .result-leaf {
+    font-size: 28px;
+    line-height: 1;
+  }
+  .result-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: white;
+    letter-spacing: 1px;
+  }
+  .result-body {
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .table-badge {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage-light), var(--cream-dark));
+    border: 2px solid var(--sage);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .table-badge-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--matcha);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .table-badge-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 300;
+    color: var(--matcha-dark);
+    line-height: 1;
+  }
+  .result-details {
+    flex: 1;
+  }
+  .result-details p {
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+  .result-details strong {
+    color: var(--matcha-dark);
+    font-weight: 500;
+  }
+
+  /* ─── Main layout ─── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .section-title {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .section-title h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--matcha-dark);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .section-title .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--gold-light);
+    font-size: 18px;
+  }
+  .ornament-line {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-light));
+  }
+  .ornament-line.right {
+    background: linear-gradient(90deg, var(--gold-light), transparent);
+  }
+
+  /* ─── Tables grid ─── */
+  .tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .table-card {
+    background: white;
+    border: 1px solid rgba(168,197,160,0.5);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(74,124,89,0.07);
+    transition: box-shadow 0.25s, transform 0.25s;
+  }
+  .table-card:hover {
+    box-shadow: 0 8px 28px rgba(74,124,89,0.14);
+    transform: translateY(-2px);
+  }
+  .table-card-header {
+    background: linear-gradient(135deg, var(--matcha) 0%, var(--matcha-mid) 100%);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: white;
+    letter-spacing: 1.5px;
+  }
+  .table-card-count {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    font-weight: 300;
+  }
+  .table-card-guests {
+    padding: 12px 0;
+  }
+  .guest-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 18px;
+    gap: 12px;
+    border-bottom: 1px solid rgba(168,197,160,0.2);
+    transition: background 0.15s;
+  }
+  .guest-row:last-child { border-bottom: none; }
+  .guest-row:hover { background: var(--cream); }
+  .guest-row.highlight {
+    background: var(--sage-light);
+    animation: pulse 0.6s ease;
+  }
+  @keyframes pulse {
+    0%   { background: var(--sage); }
+    100% { background: var(--sage-light); }
+  }
+  .seat-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--cream-dark);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--matcha);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+  .guest-name {
+    font-size: 13.5px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid rgba(168,197,160,0.3);
+    font-size: 12px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+  footer span { color: var(--gold); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 600px) {
+    .floral-tl, .floral-br { width: 200px; }
+    .floral-tr, .floral-bl { width: 140px; }
+    header { padding: 40px 20px 32px; }
+    main { padding: 32px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Decorative floral SVG corners -->
+<svg class="floral-corner floral-tl" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#4A7C59" stroke-width="1.5">
+    <path d="M10,290 Q60,200 150,150 Q200,60 290,10"/>
+    <path d="M10,250 Q80,190 130,120 Q180,70 250,10"/>
+    <path d="M10,210 Q90,170 110,100 Q130,50 190,10"/>
+    <!-- leaves -->
+    <ellipse cx="90" cy="200" rx="22" ry="10" transform="rotate(-40,90,200)"/>
+    <ellipse cx="140" cy="150" rx="20" ry="9" transform="rotate(-55,140,150)"/>
+    <ellipse cx="185" cy="105" rx="18" ry="8" transform="rotate(-70,185,105)"/>
+    <ellipse cx="60" cy="240" rx="16" ry="7" transform="rotate(-30,60,240)"/>
+    <!-- flowers -->
+    <circle cx="70" cy="210" r="6"/>
+    <circle cx="155" cy="138" r="5"/>
+    <circle cx="200" cy="90" r="7"/>
+    <path d="M70,200 Q80,195 70,185 Q60,195 70,200Z"/>
+    <path d="M70,220 Q80,225 70,235 Q60,225 70,220Z"/>
+    <path d="M60,210 Q55,200 45,210 Q55,220 60,210Z"/>
+    <path d="M80,210 Q85,200 95,210 Q85,220 80,210Z"/>
+  </g>
+</svg>
+
+<svg class="floral-corner floral-br" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#4A7C59" stroke-width="1.5">
+    <path d="M10,290 Q60,200 150,150 Q200,60 290,10"/>
+    <path d="M10,250 Q80,190 130,120 Q180,70 250,10"/>
+    <path d="M10,210 Q90,170 110,100 Q130,50 190,10"/>
+    <ellipse cx="90" cy="200" rx="22" ry="10" transform="rotate(-40,90,200)"/>
+    <ellipse cx="140" cy="150" rx="20" ry="9" transform="rotate(-55,140,150)"/>
+    <ellipse cx="185" cy="105" rx="18" ry="8" transform="rotate(-70,185,105)"/>
+    <circle cx="70" cy="210" r="6"/><circle cx="155" cy="138" r="5"/><circle cx="200" cy="90" r="7"/>
+  </g>
+</svg>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="monogram">
+    <div class="monogram-divider"></div>
+    <div class="monogram-letter">B &amp; N</div>
+    <div class="monogram-divider"></div>
+  </div>
+  <h1>Benjamin &amp; <em>Nicole</em></h1>
+  <p class="subtitle">Wedding Reception · Seating Chart</p>
+
+  <div class="search-section">
+    <label class="search-label" for="search">Find your seat</label>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="Type your name…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    </div>
+    <div id="result"></div>
+  </div>
+</header>
+
+<!-- ─── MAIN ─── -->
+<main>
+  <div class="section-title">
+    <h2>All Tables</h2>
+    <div class="ornament">
+      <div class="ornament-line"></div>
+      <span>🌿</span>
+      <div class="ornament-line right"></div>
+    </div>
+  </div>
+
+  <div class="tables-grid" id="tablesGrid"></div>
+</main>
+
+<footer>
+  <span>♡</span> &nbsp;With love, Benjamin &amp; Nicole &nbsp;<span>♡</span>
+</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+// Replace these with real names when you have them!
+// Format: { name: "Full Name", table: tableNumber, seat: seatNumber }
+const guests = [];
+const nTables = 16;
+const seatsPerTable = 8;
+
+for (let t = 1; t <= nTables; t++) {
+  for (let s = 1; s <= seatsPerTable; s++) {
+    const guestNum = (t - 1) * seatsPerTable + s;
+    guests.push({ name: `Guest ${guestNum}`, table: t, seat: s });
+  }
+}
+
+// ─── RENDER TABLES ───────────────────────────────────────────────────────────
+const grid = document.getElementById('tablesGrid');
+
+for (let t = 1; t <= nTables; t++) {
+  const tableGuests = guests.filter(g => g.table === t);
+  const card = document.createElement('div');
+  card.className = 'table-card';
+  card.dataset.table = t;
+
+  card.innerHTML = `
+    <div class="table-card-header">
+      <span class="table-card-title">Table ${t}</span>
+      <span class="table-card-count">${tableGuests.length} guests</span>
+    </div>
+    <div class="table-card-guests">
+      ${tableGuests.map(g => `
+        <div class="guest-row" data-name="${g.name.toLowerCase()}" data-seat="${g.seat}">
+          <div class="seat-num">${g.seat}</div>
+          <div class="guest-name">${g.name}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  grid.appendChild(card);
+}
+
+// ─── SEARCH ─────────────────────────────────────────────────────────────────
+const searchInput = document.getElementById('search');
+const resultDiv   = document.getElementById('result');
+
+let highlightedRows = [];
+
+function clearHighlights() {
+  highlightedRows.forEach(r => r.classList.remove('highlight'));
+  highlightedRows = [];
+}
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.trim().toLowerCase();
+  clearHighlights();
+  resultDiv.className = '';
+  resultDiv.innerHTML = '';
+
+  if (!query) return;
+
+  const match = guests.find(g => g.name.toLowerCase().includes(query));
+
+  if (match) {
+    resultDiv.className = 'result-found visible';
+    resultDiv.innerHTML = `
+      <div class="result-header">
+        <div class="result-leaf">🌿</div>
+        <div class="result-name">${match.name}</div>
+      </div>
+      <div class="result-body">
+        <div class="table-badge">
+          <div class="table-badge-label">Table</div>
+          <div class="table-badge-num">${match.table}</div>
+        </div>
+        <div class="result-details">
+          <p>You're seated at <strong>Table ${match.table}</strong>, Seat ${match.seat}.</p>
+          <p>Please make your way to your table and enjoy the celebration!</p>
+        </div>
+      </div>
+    `;
+
+    // Scroll to table card and highlight row
+    const card = document.querySelector(`.table-card[data-table="${match.table}"]`);
+    if (card) {
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      const row = card.querySelector(`[data-name="${match.name.toLowerCase()}"]`);
+      if (row) { row.classList.add('highlight'); highlightedRows.push(row); }
+    }
+  } else {
+    resultDiv.className = 'result-none visible';
+    resultDiv.innerHTML = `We couldn't find "<strong>${searchInput.value.trim()}</strong>" — please try your full name or ask a member of the wedding party.`;
+  }
+});
+</script>
+</body>
+</html>
