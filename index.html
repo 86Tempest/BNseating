@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Benjamin & Nicole — Seating Chart</title>
+<title>Ben & Nicole — Seating Chart</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -64,13 +65,13 @@
   .monogram-divider {
     width: 60px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    background: linear-gradient(90deg, transparent, var(--matcha-mid), transparent);
   }
   .monogram-letter {
     font-family: 'Cormorant Garamond', serif;
     font-size: 36px;
     font-weight: 300;
-    color: var(--gold);
+    color: var(--matcha-mid);
     letter-spacing: 4px;
   }
 
@@ -86,7 +87,7 @@
   h1 em {
     font-style: italic;
     font-weight: 300;
-    color: var(--gold);
+    color: var(--matcha-mid);
   }
 
   .subtitle {
@@ -271,10 +272,10 @@
   .ornament-line {
     width: 80px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold-light));
+    background: linear-gradient(90deg, transparent, var(--matcha-mid));
   }
   .ornament-line.right {
-    background: linear-gradient(90deg, var(--gold-light), transparent);
+    background: linear-gradient(90deg, var(--matcha-mid), transparent);
   }
 
   /* ─── Tables grid ─── */
@@ -425,7 +426,7 @@
     <div class="monogram-letter">B &amp; N</div>
     <div class="monogram-divider"></div>
   </div>
-  <h1>Benjamin &amp; <em>Nicole</em></h1>
+  <h1>Ben &amp; <em>Nicole</em></h1>
   <p class="subtitle">Wedding Reception · Seating Chart</p>
 
   <div class="search-section">
@@ -537,13 +538,15 @@ searchInput.addEventListener('input', () => {
       </div>
     `;
 
-    // Scroll to table card and highlight row
+    // Highlight the matching row in the table grid (no auto-scroll)
     const card = document.querySelector(`.table-card[data-table="${match.table}"]`);
     if (card) {
-      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
       const row = card.querySelector(`[data-name="${match.name.toLowerCase()}"]`);
       if (row) { row.classList.add('highlight'); highlightedRows.push(row); }
     }
+
+    // Scroll result card into view (stays near search bar)
+    setTimeout(() => resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
   } else {
     resultDiv.className = 'result-none visible';
     resultDiv.innerHTML = `We couldn't find "<strong>${searchInput.value.trim()}</strong>" — please try your full name or ask a member of the wedding party.`;
